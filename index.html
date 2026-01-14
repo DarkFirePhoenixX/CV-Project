@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/x-icon" href="VM.ico">
+    <link rel="stylesheet" href="styles.css" />
+    <title>Stan's Server</title>
+    <style>
+			@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+      html {
+        background: black;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+		font-family: "Press Start 2P", system-ui;
+		font-weight: 400;
+		font-style: normal;
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        position: relative;
+      }
+	  #matrix {
+        position: absolute;
+        z-index: -1;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+      }
+      .wrapper {
+		position: absolute;
+		top: 25vh;
+		left: 50vw;
+		transform: translate(-50%, -50%); /* Centers the wrapper both vertically and horizontally */
+		width: 90%; /* Ensures the wrapper takes up 90% of the viewport width */
+		max-width: 325px; /* Limits the maximum width of the wrapper to prevent it from growing too large on big screens */
+		text-align: center;
+		color: white;
+		z-index: 1;
+		}
+
+.spinner {
+  width: 70px;
+  height: 70px;
+  --clr: #7CFC00;
+  --clr-alpha: rgba(43, 255, 19, 0.1);
+  animation: spinner 1.6s infinite ease;
+  transform-style: preserve-3d;
+  margin-bottom: 10px;
+  position: absolute;
+  top: 35vh;
+  transform: translateX(-50%);
+}
+
+.card-text {
+  margin-bottom: 25px;
+  font-size: 0.6em;
+  line-height: 15px;
+}
+
+/* For smaller screens */
+@media (max-width: 600px) {
+  .wrapper {
+    width: 80%; /* On smaller screens, make the wrapper take up 80% of the screen width */
+    padding: 10px;
+	left: 47.5vw;
+  }
+  .spinner {
+    width: 50px; /* Smaller spinner for smaller devices */
+    height: 50px;
+  }
+  .spinnerText {
+    font-size: 10px; /* Smaller font for the spinner text */
+  }
+}
+
+/* For larger screens */
+@media (min-width: 1200px) {
+  .wrapper {
+    width: 50%; /* On larger screens, the wrapper will take up 50% of the screen width */
+  }
+}
+
+      .spinnerText{
+        margin-top: 20px;
+        font-size: 11px;
+        z-index: 1;
+        position: absolute;
+        top: 47.5vh;
+		font-weight: bold;
+      }
+
+.spinner > div {
+  background-color: var(--clr-alpha);
+  height: 100%;
+  position: absolute;
+  width: 100%;
+  border: 3.5px solid var(--clr);
+}
+
+.spinner div:nth-of-type(1) {
+  transform: translateZ(-35.2px) rotateY(180deg);
+}
+
+.spinner div:nth-of-type(2) {
+  transform: rotateY(-270deg) translateX(50%);
+  transform-origin: top right;
+}
+
+.spinner div:nth-of-type(3) {
+  transform: rotateY(270deg) translateX(-50%);
+  transform-origin: center left;
+}
+
+.spinner div:nth-of-type(4) {
+  transform: rotateX(90deg) translateY(-50%);
+  transform-origin: top center;
+}
+
+.spinner div:nth-of-type(5) {
+  transform: rotateX(-90deg) translateY(50%);
+  transform-origin: bottom center;
+}
+
+.spinner div:nth-of-type(6) {
+  transform: translateZ(35.2px);
+}
+
+@keyframes spinner {
+  0% {
+    transform: rotate(45deg) rotateX(-25deg) rotateY(25deg);
+  }
+
+  50% {
+    transform: rotate(45deg) rotateX(-385deg) rotateY(25deg);
+  }
+
+  100% {
+    transform: rotate(45deg) rotateX(-385deg) rotateY(385deg);
+  }
+}
+
+.container {
+  display: flex;
+  margin: auto;
+  aspect-ratio: 16/9;
+  align-items: center;
+  justify-items: center;
+  justify-content: center;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.input-container {
+  filter: drop-shadow(46px 36px 24px transparent)
+    drop-shadow(-55px -40px 25px transparent);
+  /* animation: blinkShadowsFilter 8s ease-in infinite; */
+}
+
+.input-content {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  align-items: center;
+  text-align: center;
+  padding-inline: 1em;
+}
+
+.input-content::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  filter: blur(40px);
+  -webkit-clip-path: polygon(
+    26% 0,
+    66% 0,
+    92% 0,
+    100% 8%,
+    100% 89%,
+    91% 100%,
+    7% 100%,
+    0 92%,
+    0 0
+  );
+  clip-path: polygon(
+    26% 0,
+    66% 0,
+    92% 0,
+    100% 8%,
+    100% 89%,
+    91% 100%,
+    7% 100%,
+    0 92%,
+    0 0
+  );
+  background: rgba(122, 251, 255, 0.5568627451);
+  transition: all 1s ease-in-out;
+}
+
+.input-content::after {
+  content: "";
+  position: absolute;
+  width: 98%;
+  height: 98%;
+  box-shadow: inset 0px 0px 20px 20px #212121;
+  background: repeating-linear-gradient(
+      to bottom,
+      transparent 0%,
+      rgba(12, 54, 3, 0.6) 1px,
+      rgb(0, 0, 0) 3px,
+      hsl(91, 61%, 12%) 5px,
+      #15441c 4px,
+      transparent 0.5%
+    ),
+    repeating-linear-gradient(
+      to left,
+      hsl(295, 60%, 12%) 100%,
+      hsla(295, 60%, 12%, 0.99) 100%
+    );
+  -webkit-clip-path: polygon(
+    26% 0,
+    31% 5%,
+    61% 5%,
+    66% 0,
+    92% 0,
+    100% 8%,
+    100% 89%,
+    91% 100%,
+    7% 100%,
+    0 92%,
+    0 0
+  );
+  clip-path: polygon(
+    26% 0,
+    31% 5%,
+    61% 5%,
+    66% 0,
+    92% 0,
+    100% 8%,
+    100% 89%,
+    91% 100%,
+    7% 100%,
+    0 92%,
+    0 0
+  );
+  animation: backglitch 50ms linear infinite;
+}
+
+.input-dist {
+  z-index: 80;
+  display: grid;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  padding-inline: 1em;
+  padding-block: 1.2em;
+  grid-template-columns: 1fr;
+}
+
+.input-type {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 1em;
+  font-size: 1.1rem;
+  background-color: transparent;
+  width: 100%;
+  border: none;
+}
+
+.input-is {
+  font-family: "Press Start 2P", system-ui;
+		font-weight: 400;
+		font-style: normal;
+  color: #fff;
+  font-size: 0.8rem;
+  background-color: transparent;
+  width: 100%;
+  box-sizing: border-box;
+  padding-inline: 0.5em;
+  padding-block: 0.7em;
+  border: none;
+  transition: all 1s ease-in-out;
+  border-bottom: 1px solid hsl(221, 26%, 43%);
+}
+
+.input-is:hover {
+  transition: all 1s ease-in-out;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(133, 255, 102, 0.2) 27%,
+    rgba(133, 255, 102, 0.2) 63%,
+    transparent 100%
+  );
+  transform: scale(1.1);
+}
+
+.input-content:focus-within::before {
+  transition: all 1s ease-in-out;
+  background: hsla(0, 0%, 100%, 0.814);
+}
+
+.input-is:focus {
+  outline: none;
+  border-bottom: 1px solid hsl(192, 100%, 100%);
+  color: hsl(192, 100%, 88%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(102, 255, 110, 0.2) 27%,
+    rgba(133, 255, 102, 0.2) 63%,
+    transparent 100%
+  );
+}
+
+.input-is::-moz-placeholder {
+  color: hsla(192, 100%, 88%, 0.806);
+}
+
+.input-is::placeholder {
+  color: hsla(192, 100%, 88%, 0.806);
+}
+
+.submit-button {
+  font-family: "Press Start 2P", system-ui;
+		font-weight: 400;
+		font-style: normal;
+    font-size: 0.8rem;
+  width: 50%;
+  border: none;
+  color: hsla(192, 100%, 88%, 0.806);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(133, 255, 102, 0.2) 27%,
+    rgba(133, 255, 102, 0.2) 63%,
+    transparent 100%
+  );
+  clip-path: polygon(0 0, 85% 0%, 100% 0, 100% 15%, 100% 90%, 91% 100%, 0 100%);
+  padding: 0.5em;
+  animation: blinkShadowsFilter 0.5s ease-in infinite;
+  transition: all 500ms;
+}
+
+.submit-button:hover {
+  color: hsl(0, 0%, 100%);
+  cursor: pointer;
+  font-size: medium;
+  font-weight: bold;
+}
+
+@keyframes backglitch {
+  0% {
+    box-shadow: inset 0px 20px 20px 30px #212121;
+  }
+
+  50% {
+    box-shadow: inset 0px -20px 20px 30px hsl(100, 41%, 10%);
+  }
+
+  to {
+    box-shadow: inset 0px 20px 20px 30px #212121;
+  }
+}
+
+@keyframes rotate {
+  0% {
+    transform: rotate(0deg) translate(-50%, 20%);
+  }
+
+  50% {
+    transform: rotate(180deg) translate(40%, 10%);
+  }
+
+  to {
+    transform: rotate(360deg) translate(-50%, 20%);
+  }
+}
+
+.dots {
+  color: white;
+  position: relative;
+}
+
+.dots::after {
+  position: absolute;
+  animation: b 3s infinite linear;
+  color: white;
+  content: "";
+  left: 105%;
+}
+
+@keyframes b {
+  0% {
+    content: "";
+  }
+
+  10% {
+    content: ".";
+  }
+
+  40% {
+    content: "..";
+  }
+
+  70% {
+    content: "...";
+  }
+
+  100% {
+    content: "";
+  }
+}
+
+    </style>
+  </head>
+  <body>
+<div class="spinner">
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+  <div></div>
+</div>
+<div class="spinnerText">Connecting to mainframe<span class="dots"></span></div>
+    <canvas id="matrix"></canvas>
+   
+    <script>
+      const canvas = document.getElementById("matrix");
+      const context = canvas.getContext("2d");
+
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      // const katakana =
+      //   "アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルグズブヅプエェケセテネヘメレヱゲゼデベペオォコソトノホモヨョロヲゴゾドボポヴッン";
+      // const latin = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      // const nums = "0123456789";
+
+      // const alphabet = katakana + latin + nums;
+
+      const alphabet = "01"
+
+      const fontSize = 16;
+      const columns = canvas.width / fontSize;
+
+      const rainDrops = [];
+
+      for (let x = 0; x < columns; x++) {
+        rainDrops[x] = 1;
+      }
+
+      const draw = () => {
+        context.fillStyle = "rgba(0, 0, 0, 0.05)";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        context.fillStyle = "#32CD32";
+        context.font = fontSize + "px monospace";
+
+        for (let i = 0; i < rainDrops.length; i++) {
+          const text = alphabet.charAt(
+            Math.floor(Math.random() * alphabet.length)
+          );
+          context.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+          if (
+            rainDrops[i] * fontSize > canvas.height &&
+            Math.random() > 0.975
+          ) {
+            rainDrops[i] = 0;
+          }
+          rainDrops[i]++;
+        }
+      };
+
+      setInterval(draw, 30);
+
+      setTimeout(() => {
+        document.querySelector(".spinner").remove();
+        document.querySelector(".spinnerText").remove();
+        let div = document.createElement("div")
+        div.innerHTML = `<form class="container" action="console.html" method="POST" onsubmit="event.preventDefault(); validateMyForm();">
+            <div class="input-container">
+              <div class="input-content">
+                <div class="input-dist">
+                  <span class="card-text">Restricted Area Access.<br>Authorized personel only!</span>
+                  <div class="input-type">
+                    <input class="input-is" type="text" placeholder="User" />
+                    <input
+                      class="input-is"
+                      type="password"
+                      placeholder="Password"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+            <button class="submit-button">Log in</button>
+          </form>`
+document.body.appendChild(div)
+      }, 7000);
+
+      function validateMyForm() {
+		if(document.querySelectorAll(".input-is")[0].value.trim().length < 1 || document.querySelectorAll(".input-is")[1].value.trim().length < 1){
+            document.querySelector(".card-text").innerHTML = "Error submiting.<br>Please fill in all fields!";
+        }
+        else if(document.querySelectorAll(".input-is")[0].value.trim() == "stan" && document.querySelectorAll(".input-is")[1].value.trim() == "123"){
+            document.querySelector(".container").parentElement.hidden = true;
+            let div = document.createElement("div")
+            let divText = document.createElement("div")
+            divText.classList = "spinnerText"
+            div.classList = "spinner"
+            div.innerHTML = `  <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>
+                            <div></div>`
+            divText.innerHTML = `Authorized. Connecting to mainframe<span class="dots"></span>`
+            document.body.appendChild(div)
+            document.body.appendChild(divText)
+            
+            setTimeout(() => {
+                document.querySelector(".container").submit();
+            }, 3500);
+        }
+        else{
+            document.querySelector(".card-text").innerHTML = "Wrong username or password!<br>Please try again.";
+        }
+      }
+
+document.ondragstart = function(){return false;}
+document.oncontextmenu = function(){return false;}
+document.onselectstart = function(){return false;}
+
+    </script>
+  </body>
+</html>

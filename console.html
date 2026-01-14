@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="VM.ico">
+  <title>Stan's VM</title>
+  <style>
+/* General styling for the page */
+body {
+  /* background-color: #1e1e1e; */
+  background-image: url(unixBg.png);
+  background-position: bottom;
+  background-size: cover;
+  color: #fff;
+  font-family: "Consolas", Courier, monospace;
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+a {
+    text-decoration: none;
+    color: #00ff00;
+}
+
+/* Terminal container */
+.terminal {
+  width: 80%;
+  max-width: 1000px;
+  min-width: 600px;
+  background-color: #222;
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  height: 80vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+/* Output area */
+.output {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-bottom: 10px;
+}
+
+/* Input line with prompt */
+.inputLine {
+  display: flex;
+  align-items: center;
+}
+
+#prompt {
+  color: #00ff00;
+  margin-right: 10px;
+}
+
+/* Style for the input field */
+input[type="text"] {
+  background: none;
+  border: none;
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  outline: none;
+  width: 100%;
+}
+
+/* Responsive styling */
+@media (max-width: 600px) {
+  .terminal {
+    width: 95%;
+    padding: 10px;
+  }
+
+  input[type="text"] {
+    font-size: 0.9rem;
+  }
+}
+
+div.fadeMe {
+  width:      100%;
+  height:     100%; 
+  z-index:    10;
+  position:   fixed;
+  background-image: url(Desktop1.png);
+  background-position: center;
+  /* background: rgb(2,0,36);
+  background: linear-gradient(0deg, rgba(2,0,36,1) 0%, rgba(87,255,103,1) 0%, rgba(0,212,255,1) 100%); */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 50px;
+}
+
+.login {
+  border: 0.5px solid white;
+  border-radius: 10px;
+  padding: 10px 50px 10px 10px;
+  display: flex;
+  background-color: rgb(29, 29, 29);
+}
+
+.user {
+  height: 75px;
+  margin-right: 20px;
+  border-radius: 5px;
+}
+
+.loginDetails {
+  margin-top: 5px;
+  font-size: 1.2em;
+  font-weight: bold;
+}
+
+.button {
+  background-color: azure;
+  margin-top: 5px;
+  font-size: 0.8em;
+  font-weight: bold;
+  border-radius: 5px;
+  filter: drop-shadow(1px 1px 1px rgb(255, 255, 255));
+}
+
+.button:hover {
+  transform: scale(1.1);
+  color: white;
+  background-color: rgb(161, 161, 161);
+  cursor: pointer;
+}
+
+.loader {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      position: relative;
+      animation: rotate 1s linear infinite;
+    }
+    .loader::before {
+      content: "";
+      box-sizing: border-box;
+      position: absolute;
+      inset: 0px;
+      border-radius: 50%;
+      border: 5px solid #FFF;
+      animation: prixClipFix 2s linear infinite ;
+    }
+
+    @keyframes rotate {
+      100%   {transform: rotate(360deg)}
+    }
+
+    @keyframes prixClipFix {
+        0%   {clip-path:polygon(50% 50%,0 0,0 0,0 0,0 0,0 0)}
+        25%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 0,100% 0,100% 0)}
+        50%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,100% 100%,100% 100%)}
+        75%  {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 100%)}
+        100% {clip-path:polygon(50% 50%,0 0,100% 0,100% 100%,0 100%,0 0)}
+    }
+.loadingDots {
+  margin-top: 200px;
+  font-size: 8px;
+}
+
+.loadingDots::after {
+  animation: b 5.3s infinite linear;
+  color: white;
+  content: "";
+}
+
+@keyframes b {
+  0% {
+    content: "⚪ ⚪ ⚪ ⚪ ⚪";
+  }
+
+  20% {
+    content: "🟢 ⚪ ⚪ ⚪ ⚪";
+  }
+
+  40% {
+    content: "🟢 🟢 ⚪ ⚪ ⚪";
+  }
+
+  60% {
+    content: "🟢 🟢 🟢 ⚪ ⚪";
+  }
+
+  80% {
+    content: "🟢 🟢 🟢 🟢 ⚪";
+  }
+
+  100% {
+    content: "🟢 🟢 🟢 🟢 🟢";
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="fadeMe">
+    <span class="loadingDots"></span>
+  </div>
+  <div class="terminal">
+    <div id="consoleOutput" class="output"></div>
+    <div class="inputLine">
+      <span id="prompt">$</span> <input type="text" id="userInput" autofocus />
+    </div>
+  </div>
+<script>
+// Select DOM elements
+const userInput = document.getElementById('userInput');
+const consoleOutput = document.getElementById('consoleOutput');
+
+function scrollToBottom() {
+  consoleOutput.scrollTop = consoleOutput.scrollHeight;
+}
+
+// Simulate a file system with directories and file contents
+const fileSystem = {
+  'home': {
+    'user': {
+      'documents': {
+        'about_me.txt': `🗂️ If you want a quick tour of me and my work, make sure to check out my main <a href="https://darkfirephoenixx.github.io/Portfolio/" target="_blank">website</a> or my <a href="https://github.com/DarkFirePhoenixX" target="_blank">github</a>.
+
+📃 You can also check out my resume <a href="cv.html" target="_blank">here</a>.
+
+🖥️ I’m currently working in DXC as Backup and Storage Multitech Engineer and Automation Agent.
+
+💼 I have previously worked as an honorary assistant at University of Economics Varna, teaching UNIX and Windows operating systems.
+
+⭐️ I have a Bachelor's degree in Computer Science & Informatics and a Master’s degree in Mobile & Web Technologies.
+
+👀 I’m interested in Pen Testing, Networking, OSINT, Web Security, C#, Web Design, Bash Scripting and, I am a huge Linux fan.
+
+🔤 My native language is Bulgarian 🇧🇬, but I can also speak in English 🇬🇧(C2) and German 🇩🇪(B1).
+
+🌄 My hobbies are photography, guitar & piano playing, cooking and reading.
+
+👨‍👦‍👦 Social skills: adaptability, communication, loyalty, correctness, teamwork and expeditivity.
+
+📫 If you have an interest in any of the above & would like a collaboration, you can write me at <a href="mailto:s.slavkov20@gmail.com">s.slavkov20@gmail.com</a>`
+      },
+      'projects': {
+        'connect.sh': '<a href="cv.html" target="_blank">Connecting to 182.177.65.10...</a>',
+        'helloWorld.sh': 'Hello World!'
+      }
+    }
+  },
+  'var': {
+    'log': {
+      'syslog': 'System log entries...'
+    }
+  }
+};
+
+// Starting directory
+let currentDir = fileSystem['home'];
+let currentPath = '/home';  // Initialize the path to the root path
+let inputBuffer = '';
+
+// Command history
+let commandHistory = [];
+let historyIndex = -1; // Keeps track of the current position in history
+
+// Function to process input commands
+function processInput(input) {
+  let output = '';
+  input = input.trim();
+
+  // Handle the 'ls' command to list directory contents
+  if (input.startsWith('ls')) {
+    const args = input.split(' ').slice(1); // Split the input into arguments
+    if (args.length === 0) {
+      // No directory specified, list current directory
+      output = listDirectory(currentDir);
+    } else {
+      // Directory is specified, list its contents
+      const dirPath = args.join(' ');
+      if(dirPath.includes(".")){}
+      else{
+      output = listDirectory(currentDir, dirPath);
+    }
+    }
+  }
+  // Handle the 'cd' command to change directories
+  else if (input.startsWith('cd ')) {
+    const path = input.substring(3).trim();
+    output = changeDirectory(path);
+  }
+  // Handle the 'cat' command to display the contents of a file
+  else if (input.startsWith('cat ')) {
+    const fileName = input.substring(4).trim();
+    output = cat(fileName);
+  }
+  // Handle the 'sh' command to display the contents of a file
+  else if (input.startsWith('./')) {
+    const fileName = input.substring(2).trim();
+    output = sh(fileName);
+  }
+  // Handle the 'help' command
+  else if (input === 'help') {
+    output = 'Available commands: help, ls, cd <directory>, cat <file>';
+  }
+  // Handle the 'clear' command
+  else if (input === 'clear') {
+    consoleOutput.innerHTML = '';
+    return '';
+  }
+  else {
+    output = `command not found or not properly used: ${input}`;
+  }
+
+  // Add command to history if it's not empty
+  if (input !== '') {
+    commandHistory.push(input);
+    historyIndex = commandHistory.length;  // Reset history navigation after a new command
+  }
+
+  return output;
+}
+
+// List contents of the current directory or specified directory
+function listDirectory(directory, dirPath = '') {
+  // If directory path is provided, traverse into it
+  const paths = dirPath.split('/').filter(p => p !== '');
+  let tempDir = directory;
+  scrollToBottom();
+  // Traverse to the directory in question
+  for (let dir of paths) {
+    if (tempDir[dir]) {
+      tempDir = tempDir[dir];
+    } else {
+      return `No such directory: ${dirPath}`;
+    }
+  }
+
+  // Get the contents of the directory
+  const contents = Object.keys(tempDir);
+  if (contents.length === 0) {
+    return 'Directory is empty.';
+  }
+  return contents.join('\n');
+}
+
+// Handle the 'cd' command to change directories
+function changeDirectory(path) {
+  const paths = path.split('/').filter(p => p !== '');
+  let tempDir = currentDir;
+  let tempPath = currentPath;
+  scrollToBottom();
+  // Traverse through the given path
+  for (let dir of paths) {
+    if (dir === '..') {
+      const parentPath = tempPath.split('/').slice(0, -1).join('/');
+      if (parentPath === '') {
+        return 'No parent directory.';
+      }
+      tempDir = navigateToDir(parentPath);
+      tempPath = parentPath;
+    } else if (tempDir[dir]) {
+      // Check if it's a directory (not a file)
+      if (typeof tempDir[dir] === 'object') {
+        tempDir = tempDir[dir];  // It's a directory, navigate into it
+        tempPath += '/' + dir;
+      } else {
+        // It's a file (has an extension), prevent navigation
+        return `Not a directory: ${dir}`;
+      }
+    } else {
+      return `No such directory: ${path}`;
+    }
+  }
+
+  currentDir = tempDir;
+  currentPath = tempPath;
+//   return `Changed directory to ${currentPath}`;
+    return '';
+}
+
+// Navigate to a directory from a string path
+function navigateToDir(path) {
+    scrollToBottom();
+  const paths = path.split('/').filter(p => p !== '');
+  let tempDir = fileSystem;
+  for (let dir of paths) {
+    tempDir = tempDir[dir];
+  }
+  return tempDir;
+}
+
+// // Handle the 'cat' command to display file contents in a new tab
+// function cat(fileName) {
+//   // Check if the file exists in the current directory
+//   if (currentDir[fileName]) {
+//     const fileContent = currentDir[fileName];
+
+//     // Create a new HTML document in a new tab
+    
+//     setTimeout(() => {
+//         window.open(fileContent);
+//     }, 2500);
+//     return `Opening ${fileName} in a new tab...`;
+//   } else {
+//     return `No such file: ${fileName}`;
+//   }
+// }
+
+// Handle the 'cat' command to display file contents in the console
+function cat(fileName) {
+    scrollToBottom();
+  // Check if the file exists in the current directory
+  if (currentDir[fileName]) {
+    // Check if it's a file (not a directory)
+    if (typeof currentDir[fileName] === 'string') {
+      // It's a file, display its content
+      const fileContent = currentDir[fileName];
+      const outputDiv = document.createElement('div');
+      outputDiv.innerHTML = `<pre>${fileContent}</pre>`;  // Wrap content in <pre> to preserve formatting
+      consoleOutput.appendChild(outputDiv);
+    } else {
+      // It's a directory, don't display anything
+      return ''; // Do nothing for directories
+    }
+  } else {
+    return `No such file or directory: ${fileName}`;
+  }
+
+  return ''; // Prevent showing the command input line again
+}
+
+// Handle the 'sh' command to display file contents in the console
+function sh(fileName) {
+    scrollToBottom();
+  
+    // Check if the file exists in the current directory
+    if (currentDir[fileName]) {
+        // Check if it's a file (not a directory)
+        if (typeof currentDir[fileName] === 'string') {
+            // Check if the file ends with .sh extension
+            if (fileName.endsWith('.sh')) {
+                // It's a .sh script, get its content
+                let fileContent = currentDir[fileName];
+                
+                // Extract all <a href> links from the content
+                const linkMatches = [...fileContent.matchAll(/<a href="([^"]+)"/g)];
+                
+                // Remove <a> tags from the content to not display them
+                fileContent = fileContent.replace(/<a[^>]*>/g, '').replace(/<\/a>/g, '');
+
+                // Create an output div and apply the typewriter effect to the content
+                const outputDiv = document.createElement('div');
+                consoleOutput.appendChild(outputDiv);
+                typeWriterEffect(fileContent, outputDiv);
+
+                // After 3 seconds, open all links in a new window
+                setTimeout(() => {
+                    linkMatches.forEach(match => {
+                        const link = match[1]; // The URL captured in the href attribute
+                        window.open(link, '_blank');
+                    });
+                }, 3000); // Open links after 3 seconds
+            } else {
+                // Not a .sh file, return an error
+                return `Error: ${fileName} is not a script (.sh) file.`;
+            }
+        } else {
+            // It's a directory, don't display anything
+            return ''; // Do nothing for directories
+        }
+    } else {
+        return `No such file or directory: ${fileName}`;
+    }
+
+    return ''; // Prevent showing the command input line again
+}
+
+// Auto-completion function for cd, ls, and cat commands
+function autoComplete(input) {
+  const currentDirList = Object.keys(currentDir);
+
+  // If the user is typing the 'cd' command, complete directory names
+  if (input.startsWith('cd ')) {
+    const path = input.substring(3).trim();
+    const suggestions = currentDirList.filter(item => item.startsWith(path));
+    
+    if (suggestions.length === 1) {
+      // Auto-complete the command with the first suggestion
+      userInput.value = 'cd ' + suggestions[0];
+    } else if (suggestions.length > 1) {
+      // Display a list of suggestions
+      displaySuggestions(suggestions);
+    }
+  }
+  // If the user is typing the 'ls' command, complete directory names
+  else if (input.startsWith('ls ')) {
+    const path = input.substring(3).trim();
+    const suggestions = currentDirList.filter(item => item.startsWith(path));
+
+    if (suggestions.length === 1) {
+      // Auto-complete the command with the first suggestion
+      userInput.value = 'ls ' + suggestions[0];
+    } else if (suggestions.length > 1) {
+      // Display a list of suggestions
+      displaySuggestions(suggestions);
+    }
+  }
+  // If the user is typing the 'cat' command, complete file names
+  else if (input.startsWith('cat ')) {
+    const path = input.substring(4).trim();
+    const suggestions = currentDirList.filter(item => item.startsWith(path) && !item.includes('/'));
+
+    if (suggestions.length === 1) {
+      // Auto-complete the command with the first suggestion
+      userInput.value = 'cat ' + suggestions[0];
+    } else if (suggestions.length > 1) {
+      // Display a list of suggestions
+      displaySuggestions(suggestions);
+    }
+  }
+  // If the user is typing the 'sh' command, complete file names
+  else if (input.startsWith('./')) {
+    const path = input.substring(2).trim();
+    const suggestions = currentDirList.filter(item => item.startsWith(path) && !item.includes('/'));
+
+    if (suggestions.length === 1) {
+      // Auto-complete the command with the first suggestion
+      userInput.value = './' + suggestions[0];
+    } else if (suggestions.length > 1) {
+      // Display a list of suggestions
+      displaySuggestions(suggestions);
+    }
+  }
+}
+
+// Display suggestions below the input field
+function displaySuggestions(suggestions) {
+  const suggestionDiv = document.createElement('div');
+  suggestionDiv.className = 'suggestions';
+  suggestionDiv.innerHTML = suggestions.join('<br>');
+  consoleOutput.appendChild(suggestionDiv);
+}
+
+// Handle user input and enter key press
+userInput.addEventListener('keypress', function(event) {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    const inputValue = userInput.value;
+    const outputValue = processInput(inputValue);
+
+    // Display the typed input in the console with the current path
+    const inputDiv = document.createElement('div');
+    inputDiv.innerHTML = `<span id="prompt">${currentPath}$</span> ${inputValue}`;
+    consoleOutput.appendChild(inputDiv);
+
+    // Display the output with typewriter effect
+    const outputDiv = document.createElement('div');
+    consoleOutput.appendChild(outputDiv);
+    typeWriterEffect(outputValue, outputDiv);
+
+    // Clear the input field and focus back
+    userInput.value = '';
+    userInput.focus();
+
+    // Scroll to bottom of the console
+    consoleOutput.parentElement.scrollTop = consoleOutput.parentElement.scrollHeight;
+  }
+});
+
+// Handle the Tab key to trigger auto-completion
+userInput.addEventListener('keydown', function(event) {
+  if (event.key === 'Tab') {
+    event.preventDefault();  // Prevent the default tabbing behavior
+
+    const currentInput = userInput.value.trim();
+    autoComplete(currentInput);  // Trigger auto-completion
+  } else if (event.key === 'ArrowUp') {
+    // Handle the Up Arrow to navigate through history
+    if (historyIndex > 0) {
+      historyIndex--;
+      userInput.value = commandHistory[historyIndex];
+    }
+  } else if (event.key === 'ArrowDown') {
+    // Handle the Down Arrow to navigate forward in history
+    if (historyIndex < commandHistory.length - 1) {
+      historyIndex++;
+      userInput.value = commandHistory[historyIndex];
+    } else {
+      userInput.value = ''; // Reset input if we are at the end of history
+    }
+  }
+});
+
+// Typewriter effect function to display text
+function typeWriterEffect(text, element) {
+  let i = 0;
+  element.innerHTML = ''; // Clear any previous content
+
+  function type() {
+    if (i < text.length) {
+      element.innerHTML += text.charAt(i);
+      i++;
+      setTimeout(type, 25); // Adjust speed here (50 ms)
+    }
+  }
+
+  type();
+}
+
+// Greet the user when the page loads
+window.onload = () => {
+  setTimeout(() => {
+    document.querySelector(".fadeMe").style.background = "black"
+  document.querySelector(".fadeMe").innerHTML = `<div class="login">
+    <img class="user" src="user.png" alt="user">
+    <span class="loginDetails">
+      stan<br>
+      <button class="button">Log In ▶</button>
+    </span>
+  </div>`
+  document.querySelector(".button").addEventListener("click",()=>{
+  document.querySelector(".login").innerHTML = `<span class="loader"></span>`
+  document.querySelector(".login").style.pointerEvents = "none"
+  document.querySelector(".login").style.border = "0px"
+   document.querySelector(".login").style.background = "none"
+  setTimeout(() => {
+    document.querySelector(".fadeMe").remove()
+  }, 3500);
+})
+  }, 5000);
+  const greetingMessage = 'Welcome! Type "help" to see available commands.';
+  const greetingDiv = document.createElement('div');
+  greetingDiv.innerHTML = `<span id="prompt">${currentPath}$</span> ${greetingMessage}`;
+  consoleOutput.appendChild(greetingDiv);
+};
+
+document.ondragstart = function(){return false;}
+document.oncontextmenu = function(){return false;}
+document.onselectstart = function(){return false;}
+
+</script>
+</body>
+</html>
