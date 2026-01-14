@@ -305,17 +305,21 @@ function processInput(input) {
   }
   // Handle the 'help' command
   else if (input === 'help') {
-    output = 'Available commands: help, ls, cd <directory>, cat <file>';
+    output = 'Available commands: help, ls, cd <directory>, cat <file>, logout.';
   }
   // Handle the 'clear' command
   else if (input === 'clear') {
     consoleOutput.innerHTML = '';
     return '';
   }
+  // Handle the 'logout' command
+  else if (input === 'logout') {
+    output = `Logging off from "Stan's virtual" server...`;
+    logout();
+  }
   else {
     output = `command not found or not properly used: ${input}`;
   }
-
   // Add command to history if it's not empty
   if (input !== '') {
     commandHistory.push(input);
@@ -323,6 +327,12 @@ function processInput(input) {
   }
 
   return output;
+}
+
+function logout() {
+  setTimeout(() => {
+    window.location.href = "console.html";
+  }, 3000);
 }
 
 // List contents of the current directory or specified directory
@@ -642,6 +652,56 @@ window.onload = () => {
 document.ondragstart = function(){return false;}
 document.oncontextmenu = function(){return false;}
 document.onselectstart = function(){return false;}
+
+document.addEventListener("keydown", function (e) {
+    // Block F12
+    if (e.key === "F12") { // F12 key
+        e.preventDefault();
+        return false;
+    }
+
+    // Block Ctrl + Shift + I (Developer Tools)
+    if (e.ctrlKey && e.shiftKey && e.key === "I") { // Ctrl + Shift + I
+        e.preventDefault();
+        return false;
+    }
+
+    // Block Ctrl + Shift + C (Inspect Element)
+    if (e.ctrlKey && e.shiftKey && e.key === "C") { // Ctrl + Shift + C
+        e.preventDefault();
+        return false;
+    }
+
+    // Block Ctrl + U (View Page Source)
+    if (e.ctrlKey && e.key === "u") { // Ctrl + U
+        e.preventDefault();
+        return false;
+    }
+
+    // Block Ctrl + Shift + J (Developer Tools Console tab)
+    if (e.ctrlKey && e.shiftKey && e.key === "J") { // Ctrl + Shift + J
+        e.preventDefault();
+        return false;
+    }
+
+    // Block Ctrl + Shift + F (Search in DevTools)
+    if (e.ctrlKey && e.shiftKey && e.key === "F") { // Ctrl + Shift + F
+        e.preventDefault();
+        return false;
+    }
+
+    // Block Ctrl + Alt + I (Developer Tools)
+    if (e.ctrlKey && e.altKey && e.key === "I") { // Ctrl + Alt + I
+        e.preventDefault();
+        return false;
+    }
+
+    // Block right-click (optional)
+    if (e.button === 2) { // Right-click
+        e.preventDefault();
+        return false;
+    }
+});
 
 </script>
 </body>
