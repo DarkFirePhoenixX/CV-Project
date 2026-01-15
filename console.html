@@ -298,14 +298,19 @@ function processInput(input) {
     const fileName = input.substring(4).trim();
     output = cat(fileName);
   }
-  // Handle the 'sh' command to display the contents of a file
+  // Handle the 'firewall' command to use firewall related commands
+  else if (input.startsWith('firewall ')) {
+    const command = input.substring(9).trim();
+    output = firewall(command);
+  }
+  // Handle the 'sh' command to run a script
   else if (input.startsWith('./')) {
     const fileName = input.substring(2).trim();
     output = sh(fileName);
   }
   // Handle the 'help' command
   else if (input === 'help') {
-    output = 'Available commands: help, ls, cd <directory>, cat <file>, logout.';
+    output = 'Available commands: help, ls, cd <directory>, cat <file>, firewall, logout.';
   }
   // Handle the 'clear' command
   else if (input === 'clear') {
@@ -313,7 +318,7 @@ function processInput(input) {
     return '';
   }
   // Handle the 'logout' command
-  else if (input === 'logout') {
+  else if (input === 'logout' || input === 'exit') {
     output = `Logging off from "Stan's virtual" server...`;
     logout();
   }
@@ -444,6 +449,48 @@ function cat(fileName) {
   return ''; // Prevent showing the command input line again
 }
 
+localStorage.setItem("firewall","RUNNING");
+// Handle the 'firewall' command
+function firewall(command) {
+  scrollToBottom();
+
+  const outputDiv = document.createElement('div');
+
+  switch (command) {
+    case 'start':
+      if (localStorage.getItem("firewall") == "RUNNING") {
+        outputDiv.textContent = 'Firewall service is already running.';
+      } else {
+        localStorage.setItem("firewall","RUNNING");
+        outputDiv.textContent = 'Firewall service started successfully.';
+      }
+      break;
+
+    case 'stop':
+      if (localStorage.getItem("firewall") == "STOPPED") {
+        outputDiv.textContent = 'Firewall service is already stopped.';
+      } else {
+        localStorage.setItem("firewall","STOPPED");
+        outputDiv.textContent = 'Firewall service stopped successfully.';
+      }
+      break;
+
+    case 'status':
+      outputDiv.textContent = localStorage.getItem("firewall")
+        ? 'Firewall service status: RUNNING'
+        : 'Firewall service status: STOPPED';
+      break;
+
+    default:
+      outputDiv.textContent =
+        'Usage: firewall { start | stop | status }';
+  }
+
+  consoleOutput.appendChild(outputDiv);
+  typeWriterEffect(outputDiv.textContent, outputDiv);
+  return '';
+}
+
 // Handle the 'sh' command to display file contents in the console
 function sh(fileName) {
     scrollToBottom();
@@ -466,13 +513,18 @@ function sh(fileName) {
                 // Create an output div and apply the typewriter effect to the content
                 const outputDiv = document.createElement('div');
                 consoleOutput.appendChild(outputDiv);
+                if(localStorage.getItem("firewall") == "RUNNING"){
+                  fileContent = "Outbound connection to 182.177.65.10 actively refused. Please check your firewall settings (eg. firewall start | stop | status).";
+                }
                 typeWriterEffect(fileContent, outputDiv);
 
                 // After 3 seconds, open all links in a new window
                 setTimeout(() => {
                     linkMatches.forEach(match => {
                         const link = match[1]; // The URL captured in the href attribute
-                        window.open(link, '_blank');
+                        if(localStorage.getItem("firewall") == "STOPPED"){
+                          window.open(link, '_blank');
+                        }
                     });
                 }, 3000); // Open links after 3 seconds
             } else {
@@ -493,6 +545,7 @@ function sh(fileName) {
 // Auto-completion function for cd, ls, and cat commands
 function autoComplete(input) {
   const currentDirList = Object.keys(currentDir);
+  const firewallCommands = ['start', 'stop', 'status'];
 
   // If the user is typing the 'cd' command, complete directory names
   if (input.startsWith('cd ')) {
@@ -533,6 +586,23 @@ function autoComplete(input) {
       displaySuggestions(suggestions);
     }
   }
+
+  // If the user is typing the 'firewall' command, complete subcommands
+else if (input.startsWith('firewall ')) {
+  const subCommand = input.substring(9).trim();
+
+  const suggestions = ['start', 'stop', 'status']
+    .filter(cmd => cmd.startsWith(subCommand));
+
+  if (suggestions.length === 1) {
+    userInput.value = 'firewall ' + suggestions[0];
+  } else if (suggestions.length > 1) {
+    const outputDiv = document.createElement('div');
+    outputDiv.textContent = suggestions.join(' | ');
+    consoleOutput.appendChild(outputDiv);
+  }
+}
+
   // If the user is typing the 'sh' command, complete file names
   else if (input.startsWith('./')) {
     const path = input.substring(2).trim();
