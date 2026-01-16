@@ -216,6 +216,7 @@ div.fadeMe {
 // Select DOM elements
 const userInput = document.getElementById('userInput');
 const consoleOutput = document.getElementById('consoleOutput');
+document.body.onkeypress=function(){return false;}
 
 function scrollToBottom() {
   consoleOutput.scrollTop = consoleOutput.scrollHeight;
@@ -481,9 +482,23 @@ function firewall(command) {
         : 'Firewall service status: STOPPED';
       break;
 
+    case 'rules':
+      if (localStorage.getItem("firewall") == "RUNNING") {
+      outputDiv.textContent =
+        `To                 Action    From
+--                 ------    ----
+182.177.65.10      DENY      192.168.0.110`}
+      else {
+      outputDiv.textContent =
+        `To                 Action    From
+--                 ------    ----
+182.177.65.10      ALLOW      192.168.0.110`
+      }
+      break;
+
     default:
       outputDiv.textContent =
-        'Usage: firewall { start | stop | status }';
+        'Usage: firewall { start | stop | status | rules }';
   }
 
   consoleOutput.appendChild(outputDiv);
@@ -514,7 +529,7 @@ function sh(fileName) {
                 const outputDiv = document.createElement('div');
                 consoleOutput.appendChild(outputDiv);
                 if(localStorage.getItem("firewall") == "RUNNING"){
-                  fileContent = "Outbound connection to 182.177.65.10 actively refused. Please check your firewall settings (eg. firewall start | stop | status).";
+                  fileContent = "Outbound connection to 182.177.65.10 actively refused. Please check your firewall settings (eg. firewall start | stop | status | rules ).";
                 }
                 typeWriterEffect(fileContent, outputDiv);
 
@@ -685,7 +700,7 @@ function typeWriterEffect(text, element) {
     if (i < text.length) {
       element.innerHTML += text.charAt(i);
       i++;
-      setTimeout(type, 25); // Adjust speed here (50 ms)
+      setTimeout(type, 10); // Adjust speed here (50 ms)
     }
   }
 
@@ -707,9 +722,10 @@ window.onload = () => {
   document.querySelector(".login").innerHTML = `<span class="loader"></span>`
   document.querySelector(".login").style.pointerEvents = "none"
   document.querySelector(".login").style.border = "0px"
-   document.querySelector(".login").style.background = "none"
+  document.querySelector(".login").style.background = "none"
   setTimeout(() => {
     document.querySelector(".fadeMe").remove()
+    document.body.onkeypress=function(){return true;}
   }, 3500);
 })
   }, 5000);
